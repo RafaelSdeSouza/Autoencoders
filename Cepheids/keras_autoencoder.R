@@ -6,7 +6,7 @@ K <- keras::backend()
 # Parameters --------------------------------------------------------------
 
 batch_size <- 50L
-original_dim <- 5L
+original_dim <- 6L
 latent_dim <- 2L
 intermediate_dim <- 3L
 epochs <- 50L
@@ -72,9 +72,9 @@ Lyrae <- read.table("blg_met_rrl.dat",header=T) %>% mutate(.,Period = log10(Peri
 
 idx <- sample(seq_len(nrow(Lyrae)),replace=F, size = 15000)
 
-x_train <-  as.matrix(Lyrae[idx ,c("Period","X.Fe.H.","R21","R31","Imag")])
+x_train <-  as.matrix(Lyrae[idx ,c("Period","X.Fe.H.","R21","R31","Imag","Vmag")])
 
-x_test <- as.matrix(Lyrae[-idx,c("Period","X.Fe.H.","R21","R31","Imag")])
+x_test <- as.matrix(Lyrae[-idx,c("Period","X.Fe.H.","R21","R31","Imag","Vmag")])
 
 
 
