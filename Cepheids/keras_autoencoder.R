@@ -1,12 +1,14 @@
 library(keras)
+library(ggplot2)
+library(dplyr)
 K <- keras::backend()
 
 # Parameters --------------------------------------------------------------
 
-batch_size <- 5L
-original_dim <- 4L
+batch_size <- 50L
+original_dim <- 5L
 latent_dim <- 2L
-intermediate_dim <- 5L
+intermediate_dim <- 3L
 epochs <- 50L
 epsilon_std <- 1.0
 
@@ -64,9 +66,16 @@ vae %>% compile(optimizer = "rmsprop", loss = vae_loss)
 
 # Data preparation --------------------------------------------------------
 
-idx <- sample(1:nrow(iris),0.6*nrow(iris),replace=F)
-x_train <- as.matrix(iris[idx,1:4])
-x_test <-  as.matrix(iris[-idx,1:4])
+
+Lyrae <- read.table("blg_met_rrl.dat",header=T) %>% mutate(.,Period = log10(Period)) %>%
+  filter(X.Fe.H. > -1.647874 && X.Fe.H. < -0.279256)
+
+idx <- sample(seq_len(nrow(Lyrae)),replace=F, size = 15000)
+
+x_train <-  as.matrix(Lyrae[idx ,c("Period","X.Fe.H.","R21","R31","Imag")])
+
+x_test <- as.matrix(Lyrae[-idx,c("Period","X.Fe.H.","R21","R31","Imag")])
+
 
 
 # Model training ----------------------------------------------------------
@@ -76,20 +85,23 @@ vae %>% fit(
   shuffle = TRUE, 
   epochs = epochs, 
   batch_size = batch_size, 
-  validation_data = list(x_test , x_test )
+  validation_data = list(x_test, x_test )
 )
 
 
 # Visualizations ----------------------------------------------------------
 
-library(ggplot2)
-library(dplyr)
+
 x_train_encoded <- predict(encoder, x_train, batch_size = batch_size)
 
 x_train_encoded  %>%
   as_data_frame() %>% 
-  mutate(class = as.factor(iris$Species[idx])) %>%
-  ggplot(aes(x = V1, y = V2, colour = class)) + geom_point()
+  ggplot(aes(x = V1, y = V2)) +  geom_density2d()
+
+
+
+
+
 
 
 x_train_decoded <- predict(vae, x_train, batch_size = batch_size) 
