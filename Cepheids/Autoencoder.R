@@ -1,4 +1,5 @@
-library(h2o)
+library(h2)
+require(mclust)
 h2o.init()
 
 
@@ -24,7 +25,7 @@ m_AE_4 = h2o.deeplearning(x = c("Period","X.Fe.H.","R21","R31","Imag","Vmag"),
                           model_id = "m_AE_4",
                           train_samples_per_iteration=nrow(train),
                           activation = "Tanh",
-                          hidden = c(4,2,1,2,4)
+                          hidden = c(4,3,2,3,4)
                           
 )
 
@@ -36,13 +37,12 @@ train_1 <- h2o.deepfeatures(m_AE_4,train,layer=3)
 d1 <- as.data.frame(train_1)
 plot(density(d1$DF.L3.C1))
 
-dens  <- Mclust(train_1)
+dens  <- Mclust(train_1,G = 3)
 
 summary(dens)
-plot(dens, what = "density", data = d1)
-
-plot(as.data.frame(train),col=dens$classification)
-
+pdf("RL.pdf",height = 10,width = 10)
+plot(as.data.frame(train[,c("Period","X.Fe.H.","R21","R31","Imag","Vmag")]),col=dens$classification)
+dev.off()
 
 
 
