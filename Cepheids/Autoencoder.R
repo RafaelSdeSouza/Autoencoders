@@ -1,4 +1,4 @@
-library(h2)
+library(h2o)
 require(mclust)
 h2o.init()
 
@@ -20,7 +20,8 @@ test <- parts[[2]]
 m_AE_4 = h2o.deeplearning(x = c("Period","X.Fe.H.","R21","R31","Imag","Vmag"),
                           training_frame=train,
                           autoencoder=TRUE,
-                          epochs = 500,
+                          epochs = 50,
+                          mini_batch_size = 20,
                           score_each_iteration=T,
                           model_id = "m_AE_4",
                           train_samples_per_iteration=nrow(train),
@@ -33,6 +34,8 @@ sh = h2o.scoreHistory(m_AE_4)
 plot(as.data.frame(h2o.scoreHistory(m_AE_4))$training_mse,type="l")
 
 train_1 <- h2o.deepfeatures(m_AE_4,train,layer=3)
+pred <- predict(m_AE_4,train)
+plot(as.data.frame(pred))
 
 d1 <- as.data.frame(train_1)
 plot(density(d1$DF.L3.C1))
